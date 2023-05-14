@@ -2,162 +2,28 @@ package Assignment3.businessLayer;
 
 import Assignment3.dataAccessLayer.ClientDAO;
 import Assignment3.modelLayer.Client;
-import Assignment3.presentationLayer.clients.ClientsView;
-import Assignment3.presentationLayer.clients.ClientsView2;
 
-import javax.swing.table.DefaultTableModel;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.Pattern;
 
 /**
- *  This class controls the two orders views. It calls methods that communicate with and modify the Client table from
- *  the database as well as methods that communicate with the user through the interface
+ *  This class represents the data access object class for the Client class
  *  @author Tudor Cristea
  */
 public class ClientsBLL
 {
     /**
-     * The first client view (part of the GUI)
-     */
-    private ClientsView clientsView;
-    /**
-     * The second client view (part of the GUI)
-     */
-    private ClientsView2 clientsView2;
-
-    /**
      * The client data access object
      */
     private ClientDAO clientDAO;
-    /**
-     * The client to be deleted/updated
-     */
-    private Client client;
 
     /**
-     * The initial name of the client - in case of adding a client, it will be an empty string
-     *                                - in case of editing a client, it will be the name of that client
+     * This is the only constructor of this class. It creates a new client data access object in order to facilitate
+     * the communication with the database
      */
-    private String initialName;
-    /**
-     * The initial phone number of the client - in case of adding a client, it will be an empty string
-     *                                        - in case of editing a client, it will be the phone number of that client
-     */
-    private String initialPhoneNumber;
-
-    /**
-     * The windowListener of the first view
-     */
-    private WindowListener windowListener;
-
-    /**
-     * This is the only constructor of this class
-     * @param clientsView is the view that is controlled by this class
-     */
-    public ClientsBLL(ClientsView clientsView)
+    public ClientsBLL()
     {
-        this.clientsView = clientsView;
-
-        windowListener = new WindowListener()
-        {
-            @Override
-            public void windowOpened(WindowEvent e)
-            {
-                clientsView.setEnabled(false);
-            }
-
-            @Override
-            public void windowClosing(WindowEvent e)
-            {
-                clientsView.setEnabled(true);
-                List<Client> clientList = null;
-                try
-                {
-                    clientList = new ArrayList<>(clientDAO.findAll());
-                }
-                catch (Exception ex)
-                {
-                    clientsView.showErrorMessage(ex.getMessage());
-                }
-                Field[] fields = Client.class.getDeclaredFields();
-                String[] headerTitles = new String[fields.length];
-                for (int i = 0; i < fields.length; ++i)
-                {
-                    headerTitles[i] = fields[i].getName();
-                }
-                clientsView.getClientsTable().setModel(new DefaultTableModel(headerTitles, 0));
-                clientsView.getClientsComboBox().removeAllItems();
-
-                for (Client client: clientList)
-                {
-                    ((DefaultTableModel) clientsView.getClientsTable().getModel()).addRow(new String[]{String.valueOf(client.getId()), client.getName(), client.getPhoneNumber()});
-                    clientsView.getClientsComboBox().addItem(client.getName());
-                }
-            }
-
-            @Override
-            public void windowClosed(WindowEvent e) {}
-
-            @Override
-            public void windowIconified(WindowEvent e) {}
-
-            @Override
-            public void windowDeiconified(WindowEvent e) {}
-
-            @Override
-            public void windowActivated(WindowEvent e) {}
-
-            @Override
-            public void windowDeactivated(WindowEvent e) {}
-        };
-
-        this.clientsView.addAddClientButtonListener(new AddClientButtonListener());
-        this.clientsView.addEditClientButtonListener(new EditClientButtonListener());
-        this.clientsView.addDeleteClientButtonListener(new DeleteClientButtonListener());
-
         clientDAO = new ClientDAO();
-    }
-
-    /**
-     * This inner class implements the "ActionListener" interface which will be added as an Action Listener to the
-     * Reset Name Button
-     */
-    class ResetNameButtonListener implements ActionListener
-    {
-        /**
-         * This method overrides the original "actionPerformed" method and changes the Name Text Field to the initial
-         * name of the client (the one that was displayed when the window opened)
-         * @param e the event to be processed
-         */
-        @Override
-        public void actionPerformed(ActionEvent e)
-        {
-            clientsView2.getNameTextField().setText(initialName);
-        }
-    }
-
-    /**
-     * This inner class implements the "ActionListener" interface which will be added as an Action Listener to the
-     * Reset Phone Number Button
-     */
-    class ResetPhoneNumberButtonListener implements ActionListener
-    {
-        /**
-         * This method overrides the original "actionPerformed" method and changes the Phone Number Text Field to the
-         * initial phone number of the client (the one that was displayed when the window opened)
-         * @param e the event to be processed
-         */
-        @Override
-        public void actionPerformed(ActionEvent e)
-        {
-            clientsView2.getPhoneNumberTextField().setText(initialPhoneNumber);
-        }
     }
 
     /**
@@ -166,232 +32,105 @@ public class ClientsBLL
      * empty or contain anything other than digits
      * @param name is a String which represents the data taken from the Name Text Field (entered by the user)
      * @param phoneNumber is a String which represents the data taken from the Phone Number Text Field (entered by the user)
-     * @return returns true if the data is valid and false otherwise
+     * @return true if the data is valid
+     * @throws Exception if the data is not valid
      */
-    private boolean isDataValid(String name, String phoneNumber)
+    private boolean isDataValid(String name, String phoneNumber) throws Exception
     {
-        boolean validData = true;
         String nameRegex = "^[a-zA-Z\\s\\-]+$";
         if (name.equals(""))
         {
-            validData = false;
-            clientsView2.showErrorMessage("Name: empty string");
+            throw new Exception("Name: empty string");
         }
         else if (!Pattern.matches(nameRegex, name))
         {
-            validData = false;
-            clientsView2.showErrorMessage("Name: invalid string");
+            throw new Exception("Name: invalid string");
         }
 
         String phoneNumberRegex = "^07\\d{8}$";
         if (phoneNumber.equals(""))
         {
-            validData = false;
-            clientsView2.showErrorMessage("Phone Number: empty string");
+            throw new Exception("Phone Number: empty string");
         }
         else if (!Pattern.matches(phoneNumberRegex, phoneNumber))
         {
-            validData = false;
-            clientsView2.showErrorMessage("Phone Number: invalid string");
+            throw new Exception("Phone Number: invalid string");
         }
 
-        return validData;
+        return true;
     }
 
     /**
-     * This inner class implements the "ActionListener" interface which will be added as an Action Listener to the
-     * Add Button from the second Client View
+     * This method returns the list of all clients from the database
+     * @return the list of clients
+     * @throws Exception if something goes wrong when communicating with the client dao
      */
-    class AddButtonListener implements ActionListener
+    public ArrayList<Client> findAllClients() throws Exception
     {
-        /**
-         * This method overrides the original "actionPerformed" method and adds a new client to the database or
-         * displays a prompt containing the error message, if it is not possible to do so
-         * @param e the event to be processed
-         */
-        @Override
-        public void actionPerformed(ActionEvent e)
-        {
-            String name = clientsView2.getNameTextField().getText();
-            String phoneNumber = clientsView2.getPhoneNumberTextField().getText();
-            if (isDataValid(name, phoneNumber))
-            {
-                try
-                {
-                    int id = clientDAO.getMaxId() + 1;
-                    clientDAO.insert(new Client(id, name, phoneNumber));
-                    clientsView2.showMessage("Client added successfully!");
-                }
-                catch (Exception ex)
-                {
-                    clientsView2.showErrorMessage(ex.getMessage());
-                }
-            }
-        }
+        return new ArrayList<>(clientDAO.findAll());
     }
 
     /**
-     * This inner class implements the "ActionListener" interface which will be added as an Action Listener to the
-     * Edit Button from the second Client View
+     * This method returns a client that has a certain id
+     * @param id the name of the searched client
+     * @return the client with the specific id
+     * @throws Exception if something goes wrong when communicating with the client dao
      */
-    class EditButtonListener implements ActionListener
+    public Client findClientById(int id) throws Exception
     {
-        /**
-         * This method overrides the original "actionPerformed" method and edits an existing client from the database
-         * or displays a prompt containing the error message, if it is not possible to do so
-         * @param e the event to be processed
-         */
-        @Override
-        public void actionPerformed(ActionEvent e)
-        {
-            String name = clientsView2.getNameTextField().getText();
-            String phoneNumber = clientsView2.getPhoneNumberTextField().getText();
+        return clientDAO.findById(id);
+    }
 
-            if (isDataValid(name, phoneNumber))
-            {
-                client.setName(name);
-                client.setPhoneNumber(phoneNumber);
-                try
-                {
-                    clientDAO.update(client);
-                    clientsView2.showMessage("Client updated successfully!");
-                }
-                catch (Exception ex)
-                {
-                    clientsView2.showErrorMessage(ex.getMessage());
-                }
-            }
+    /**
+     * This method returns a client that has a certain name
+     * @param name the name of the searched client
+     * @return the client with the specific name
+     * @throws Exception if something goes wrong when communicating with the client dao
+     */
+    public Client findClientByName(String name) throws Exception
+    {
+        return clientDAO.findByName(name);
+    }
+
+    /**
+     * This method computes the id of the new client, and then inserts a new client into the database
+     * @param name the name of the new client
+     * @param phoneNumber the phone number of the new client
+     * @throws Exception if something goes wrong when communicating with the client dao
+     */
+    public void insertClient(String name, String phoneNumber) throws Exception
+    {
+        if (isDataValid(name, phoneNumber))
+        {
+            int id = clientDAO.getMaxId() + 1;
+            clientDAO.insert(new Client(id, name, phoneNumber));
         }
     }
 
     /**
-     * This inner class implements the "ActionListener" interface which will be added as an Action Listener to the
-     * Delete Button from the second Client View
+     * This method updates an existing client from the database
+     * @param client the client to be updated
+     * @param name the (new) name of the client
+     * @param phoneNumber the (new) phone number of the client
+     * @throws Exception if something goes wrong when communicating with the client dao
      */
-    class DeleteButtonListener implements ActionListener
+    public void updateClient(Client client, String name, String phoneNumber) throws Exception
     {
-        /**
-         * This method overrides the original "actionPerformed" method and deletes an existing client from the database
-         * or displays a prompt containing the error message, if it is not possible to do so
-         * @param e the event to be processed
-         */
-        @Override
-        public void actionPerformed(ActionEvent e)
+        if (isDataValid(name, phoneNumber))
         {
-            try
-            {
-                clientDAO.delete(client);
-                clientsView2.showMessage("Client deleted successfully!");
-            }
-            catch (Exception ex)
-            {
-                clientsView2.showErrorMessage(ex.getMessage());
-            }
+            client.setName(name);
+            client.setPhoneNumber(phoneNumber);
+            clientDAO.update(client);
         }
     }
 
     /**
-     * This inner class implements the "ActionListener" interface which will be added as an Action Listener to the
-     * Add Button from the first Client View
+     * This method deletes an existing client from the database
+     * @param client the client to be deleted
+     * @throws Exception if something goes wrong when communicating with the client dao
      */
-    class AddClientButtonListener implements ActionListener
+    public void deleteClient(Client client) throws Exception
     {
-        /**
-         * This method overrides the original "actionPerformed" method and opens the second Client View so that the
-         * user can enter the parameters for a new client to be created or displays a prompt containing the error
-         * message, if it is not possible to do so
-         * @param e the event to be processed
-         */
-        @Override
-        public void actionPerformed(ActionEvent e)
-        {
-            clientsView2 = new ClientsView2(windowListener);
-            clientsView2.getEditClientButton().setEnabled(false);
-            clientsView2.getDeleteClientButton().setEnabled(false);
-            clientsView2.getTitleLabel().setText("<html><div style='text-align: center;'>Add<br>Client</div></html>");
-            clientsView2.addResetNameButtonListener(new ResetNameButtonListener());
-            clientsView2.addResetPhoneNumberButtonListener(new ResetPhoneNumberButtonListener());
-            clientsView2.addAddClientButtonListener(new AddButtonListener());
-
-            initialName = clientsView2.getNameTextField().getText();
-            initialPhoneNumber = clientsView2.getPhoneNumberTextField().getText();
-        }
-    }
-
-    /**
-     * This inner class implements the "ActionListener" interface which will be added as an Action Listener to the
-     * Edit Button from the first Client View
-     */
-    class EditClientButtonListener implements ActionListener
-    {
-        /**
-         * This method overrides the original "actionPerformed" method and opens the second Client View so that the
-         * user can modify the parameters of an existing client to be edited (which was selected by the user) or
-         * displays a prompt containing the error message, if it is not possible to do so
-         * @param e the event to be processed
-         */
-        @Override
-        public void actionPerformed(ActionEvent e)
-        {
-            clientsView2 = new ClientsView2(windowListener);
-            clientsView2.getAddClientButton().setEnabled(false);
-            clientsView2.getDeleteClientButton().setEnabled(false);
-            clientsView2.getTitleLabel().setText("<html><div style='text-align: center;'>Edit<br>Client</div></html>");
-            clientsView2.addResetNameButtonListener(new ResetNameButtonListener());
-            clientsView2.addResetPhoneNumberButtonListener(new ResetPhoneNumberButtonListener());
-            clientsView2.addEditClientButtonListener(new EditButtonListener());
-
-            try
-            {
-                client = clientDAO.findByName((String) clientsView.getClientsComboBox().getSelectedItem());
-                clientsView2.getNameTextField().setText(client.getName());
-                clientsView2.getPhoneNumberTextField().setText(client.getPhoneNumber());
-            }
-            catch (Exception ex)
-            {
-                clientsView2.showErrorMessage(ex.getMessage());
-            }
-
-            initialName = clientsView2.getNameTextField().getText();
-            initialPhoneNumber = clientsView2.getPhoneNumberTextField().getText();
-        }
-    }
-
-    /**
-     * This inner class implements the "ActionListener" interface which will be added as an Action Listener to the
-     * Delete Button from the first Client View
-     */
-    class DeleteClientButtonListener implements ActionListener
-    {
-        /**
-         * This method overrides the original "actionPerformed" method and opens the second Client View so that the
-         * user can delete an existing client (which was selected by the user) or displays a prompt containing the
-         * error message, if it is not possible to do so
-         * @param e the event to be processed
-         */
-        @Override
-        public void actionPerformed(ActionEvent e)
-        {
-            clientsView2 = new ClientsView2(windowListener);
-            clientsView2.getAddClientButton().setEnabled(false);
-            clientsView2.getEditClientButton().setEnabled(false);
-            clientsView2.getResetNameButton().setEnabled(false);
-            clientsView2.getResetPhoneNumberButton().setEnabled(false);
-            clientsView2.getNameTextField().setEnabled(false);
-            clientsView2.getPhoneNumberTextField().setEnabled(false);
-            clientsView2.getTitleLabel().setText("<html><div style='text-align: center;'>Delete<br>Client</div></html>");
-            clientsView2.addDeleteClientButtonListener(new DeleteButtonListener());
-
-            try
-            {
-                client = clientDAO.findByName((String) clientsView.getClientsComboBox().getSelectedItem());
-                clientsView2.getNameTextField().setText(client.getName());
-                clientsView2.getPhoneNumberTextField().setText(client.getPhoneNumber());
-            }
-            catch (Exception ex)
-            {
-                clientsView2.showErrorMessage(ex.getMessage());
-            }
-        }
+        clientDAO.delete(client);
     }
 }

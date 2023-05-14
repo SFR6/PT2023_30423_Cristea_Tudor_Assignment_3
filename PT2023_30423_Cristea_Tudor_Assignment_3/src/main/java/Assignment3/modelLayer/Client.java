@@ -18,7 +18,6 @@ public class Client
      * This field represents the unique phone number of a client
      */
     private String phoneNumber;
-
     /**
      * This is one of the constructors of this class. It does not initialize any field of a newly created Client object
      */

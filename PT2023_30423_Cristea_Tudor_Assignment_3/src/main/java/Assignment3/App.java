@@ -1,7 +1,7 @@
 package Assignment3;
 
-import Assignment3.businessLayer.MainBLL;
-import Assignment3.presentationLayer.MainView;
+import Assignment3.presentationLayer.controllers.MainController;
+import Assignment3.presentationLayer.views.MainView;
 
 /**
  * This class represents the main class of this application. It contains the main method of the application
@@ -18,6 +18,6 @@ public class App
     {
         MainView mainView = new MainView();
 
-        MainBLL mainBLL = new MainBLL(mainView);
+        MainController mainController = new MainController(mainView);
     }
 }

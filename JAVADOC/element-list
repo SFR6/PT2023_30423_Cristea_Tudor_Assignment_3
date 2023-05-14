@@ -4,7 +4,9 @@ Assignment3.dataAccessLayer
 Assignment3.dataAccessLayer.connection
 Assignment3.modelLayer
 Assignment3.presentationLayer
-Assignment3.presentationLayer.bills
-Assignment3.presentationLayer.clients
-Assignment3.presentationLayer.orders
-Assignment3.presentationLayer.products
+Assignment3.presentationLayer.controllers
+Assignment3.presentationLayer.views
+Assignment3.presentationLayer.views.bills
+Assignment3.presentationLayer.views.clients
+Assignment3.presentationLayer.views.orders
+Assignment3.presentationLayer.views.products
